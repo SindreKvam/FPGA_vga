@@ -19,56 +19,91 @@ end entity vga_driver;
 
 architecture RTL of vga_driver is
 	-- http://tinyvga.com/vga-timing/640x480@60Hz
-	constant HBP : integer := 48;       -- Horizontal back porch (48)
 	constant HD  : integer := 640;      -- Horizontal display (640)
 	constant HFP : integer := 16;       -- Horizontal front porch (16)
 	constant HSP : integer := 96;       -- Horizontal sync pulse (retrace) (96)
+	constant HBP : integer := 48;       -- Horizontal back porch (48)
 
-	constant VBP : integer := 33;       -- Vertical back porch (33)
 	constant VD  : integer := 480;      -- Vertical display (480)
 	constant VFP : integer := 10;       -- Vertical front porch (10)
 	constant VSP : integer := 2;        -- Vertical sync pulse (retrace) (2)
+	constant VBP : integer := 33;       -- Vertical back porch (33)
 
-	signal vPos : integer := 0;
-	signal hPos : integer := 0;
+	signal vPos      : integer := 0;
+	signal hPos      : integer := 0;
+	signal screen_nr : integer := 0;
+	signal page_nr   : integer := 0;
 begin
 
 	process(clk_25) is
 	begin
 		if rising_edge(clk_25) then
 			if rst_n = '0' then
-				hPos <= 0;
-				vPos <= 0;
+				hPos      <= 0;
+				vPos      <= 0;
+				screen_nr <= 0;
+				page_nr   <= 0;
 			else
-				if hPos < HBP + HD + HFP + HSP then
+				if hPos < HD + HFP + HSP + HBP then
 					hPos <= hPos + 1;
-					if hPos < HBP + HD + HFP then
-						h_sync <= '1';
-					else
+					if hPos > HD + HFP and hPos < HD + HFP + HSP then
 						h_sync <= '0';
+					else
+						h_sync <= '1';
 					end if;
 				else
 					hPos <= 0;
-					if vPos < VBP + VD + VFP + VSP then
+					if vPos < VD + VFP + VSP + VBP then
 						vPos <= vPos + 1;
-						if vPos < VBP + VD + VFP then
-							v_sync <= '1';
-						else
+						if vPos > VD + VFP and vPos < VD + VFP + VSP then
 							v_sync <= '0';
+						else
+							v_sync <= '1';
 						end if;
 					else
-						vPos <= 0;
+						vPos      <= 0;
+						screen_nr <= screen_nr + 1;
 					end if;
 				end if;
 
-				if hPos > HBP and hPos < HBP + HD and vPos > VBP and vPos < VBP + VD then
-					r   <= "1000";
-					g   <= "0000";
-					b   <= "1000";
-					r_p <= r;
-					g_p <= g;
-					b_p <= b;
-				else
+				if hPos < HD and vPos < VD then -- if the counter is in the visible screen (write what should be on the display in here)
+					if screen_nr > VD then
+						screen_nr <= 0;
+						page_nr   <= page_nr + 1;
+						if page_nr > 1 then
+							page_nr <= 0;
+						end if;
+					end if;
+					if vPos > screen_nr then
+						if page_nr < 1 then
+							r <= "1111";
+							g <= "0000";
+							b <= "0000";
+						elsif page_nr < 2 then
+							r <= "0000";
+							g <= "1111";
+							b <= "0000";
+						elsif page_nr < 3 then
+							r <= "0000";
+							g <= "0000";
+							b <= "1111";
+						end if;
+					else
+						if page_nr < 1 then
+							r <= "0000";
+							g <= "1111";
+							b <= "0000";
+						elsif page_nr < 2 then
+							r <= "0000";
+							g <= "0000";
+							b <= "1111";
+						elsif page_nr < 3 then
+							r <= "1111";
+							g <= "0000";
+							b <= "0000";
+						end if;
+					end if;
+				else                    -- if the counter is out of the visible screen (Do not change)
 					r <= "0000";
 					g <= "0000";
 					b <= "0000";

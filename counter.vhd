@@ -6,8 +6,8 @@ entity counter is
 	port(
 		clk    : in  std_logic;
 		rst_n  : in  std_logic;
-		cnt    : in  std_logic_vector(3 downto 0) := (others => '0');
-		clk_25 : out std_logic                    := '0'
+		cnt    : in  std_logic_vector(31 downto 0) := (others => '0');
+		clk_o : out std_logic                    := '0'
 	);
 end entity counter;
 
@@ -23,7 +23,7 @@ begin
 				if current_count < to_integer(unsigned(cnt)) then
 					current_count <= current_count + 1;
 				else
-					clk_25 <= not clk_25;
+					clk_o <= not clk_o;
 				end if;
 			end if;
 		end if;

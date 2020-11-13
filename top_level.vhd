@@ -47,13 +47,13 @@ begin
 		port map(
 			clk    => clk_50,
 			rst_n  => KEY(0),
-			cnt    => X"2",
-			clk_25 => clk_25
+			cnt    => X"00000002",
+			clk_o => clk_25
 		);
 	internal_vga_driver : entity work.vga_driver
 		port map(
 			clk_25 => clk_25,
-			rst_n => KEY(0),
+			rst_n => KEY(1),
 			h_sync => VGA_HS,
 			v_sync => VGA_VS,
 			r => VGA_R,

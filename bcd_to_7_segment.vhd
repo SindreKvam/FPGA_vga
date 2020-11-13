@@ -17,6 +17,7 @@ begin
 	process(bcd, dot) is
 	begin
 		-- The not on every output is because the 7-segment display is using common anode
+		-- remove the not in front of all of the inputs if you're using common cathode 
 
 		seven_seg(0) <= not (bcd(3) or bcd(1) or (bcd(2) and bcd(0)) or (not bcd(2) and not bcd(0)));
 		seven_seg(1) <= not (not bcd(2) or (not bcd(1) and not bcd(0)) or (bcd(1) and bcd(0)));

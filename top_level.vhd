@@ -24,10 +24,12 @@ architecture RTL of top_level is
 	signal clk_50 : std_logic;
 	signal clk_25 : std_logic;
 
+	-- Internal colour values to send in to the binary to bcd.
 	signal r : std_logic_vector(3 downto 0);
 	signal g : std_logic_vector(3 downto 0);
 	signal b : std_logic_vector(3 downto 0);
 
+	-- For drawing the colour values on the 7-seg displays
 	signal bcd_0_r : std_logic_vector(3 downto 0);
 	signal bcd_1_r : std_logic_vector(3 downto 0);
 	signal bcd_0_g : std_logic_vector(3 downto 0);
@@ -43,25 +45,25 @@ begin
 			c0     => clk_50,
 			locked => open
 		);
-	internal_counter : entity work.counter
+	clock_divider : entity work.counter
 		port map(
-			clk    => clk_50,
-			rst_n  => KEY(0),
-			cnt    => X"00000002",
+			clk   => clk_50,
+			rst_n => KEY(0),
+			cnt   => X"00000002",
 			clk_o => clk_25
 		);
 	internal_vga_driver : entity work.vga_driver
 		port map(
 			clk_25 => clk_25,
-			rst_n => KEY(1),
+			rst_n  => KEY(1),
 			h_sync => VGA_HS,
 			v_sync => VGA_VS,
-			r => VGA_R,
-			g => VGA_G,
-			b => VGA_B,
-			r_p => r,
-			g_p => g,
-			b_p => b
+			r      => VGA_R,
+			g      => VGA_G,
+			b      => VGA_B,
+			r_p    => r,
+			g_p    => g,
+			b_p    => b
 		);
 	bin_to_bcd_r : entity work.binary_to_bcd
 		port map(

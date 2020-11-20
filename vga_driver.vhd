@@ -32,17 +32,17 @@ architecture RTL of vga_driver is
 	signal vPos      : integer := 0;
 	signal hPos      : integer := 0;
 	signal screen_nr : integer := 0;
-	signal page_nr   : integer := 0;
 begin
-
 	process(clk_25) is
+		subtype page_nr_type is integer range 0 to 2;
+		variable page_nr : page_nr_type;
 	begin
 		if rising_edge(clk_25) then
 			if rst_n = '0' then
 				hPos      <= 0;
 				vPos      <= 0;
 				screen_nr <= 0;
-				page_nr   <= 0;
+				page_nr   := 0;
 			else
 				if hPos < HD + HFP + HSP + HBP then
 					hPos <= hPos + 1;
@@ -69,41 +69,52 @@ begin
 				if hPos < HD and vPos < VD then -- if the counter is in the visible screen (write what should be on the display in here)
 					if screen_nr > VD then
 						screen_nr <= 0;
-						page_nr   <= page_nr + 1;
-						if page_nr > 1 then
-							page_nr <= 0;
+						page_nr   := page_nr + 1;
+						if page_nr > 2 then
+							page_nr := 0;
 						end if;
 					end if;
 					if vPos > screen_nr then
-						if page_nr < 1 then
-							r <= "1111";
-							g <= "0000";
-							b <= "0000";
-						elsif page_nr < 2 then
-							r <= "0000";
-							g <= "1111";
-							b <= "0000";
-						elsif page_nr < 3 then
-							r <= "0000";
-							g <= "0000";
-							b <= "1111";
-						end if;
+						case page_nr is
+							when 0 =>
+								r <= "1111";
+								g <= "0000";
+								b <= "0000";
+							when 1 =>
+								r <= "0000";
+								g <= "1111";
+								b <= "0000";
+							when 2 =>
+								r <= "0000";
+								g <= "0000";
+								b <= "1111";
+						end case;
 					else
-						if page_nr < 1 then
-							r <= "0000";
-							g <= "1111";
-							b <= "0000";
-						elsif page_nr < 2 then
-							r <= "0000";
-							g <= "0000";
-							b <= "1111";
-						elsif page_nr < 3 then
-							r <= "1111";
-							g <= "0000";
-							b <= "0000";
-						end if;
+						case page_nr is
+							when 0 =>
+								r   <= "0000";
+								g   <= "1111";
+								b   <= "0000";
+								r_p <= "0000";
+								g_p <= "1111";
+								b_p <= "0000";
+							when 1 =>
+								r   <= "0000";
+								g   <= "0000";
+								b   <= "1111";
+								r_p <= "0000";
+								g_p <= "0000";
+								b_p <= "1111";
+							when 2 =>
+								r   <= "1111";
+								g   <= "0000";
+								b   <= "0000";
+								r_p <= "1111";
+								g_p <= "0000";
+								b_p <= "0000";
+						end case;
 					end if;
-				else                    -- if the counter is out of the visible screen (Do not change)
+				else                    -- if the counter is out of the visible screen. (Do not change)
 					r <= "0000";
 					g <= "0000";
 					b <= "0000";
@@ -111,4 +122,5 @@ begin
 			end if;
 		end if;
 	end process;
+
 end architecture RTL;

@@ -1,0 +1,9 @@
+*
+!*.vhd
+!.gitignore
+
+/output_files/*
+
+!/output_files/*.qsf
+!/output_files/*.qpf
+!/output_files/*.vhd

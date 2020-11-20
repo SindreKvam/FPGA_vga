@@ -4,10 +4,10 @@ use ieee.numeric_std.all;
 
 entity counter is
 	port(
-		clk    : in  std_logic;
-		rst_n  : in  std_logic;
-		cnt    : in  std_logic_vector(31 downto 0) := (others => '0');
-		clk_o : out std_logic                    := '0'
+		clk   : in  std_logic;
+		rst_n : in  std_logic;
+		cnt   : in  std_logic_vector(31 downto 0) := (others => '0');
+		clk_o : out std_logic                     := '0'
 	);
 end entity counter;
 

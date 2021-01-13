@@ -3,124 +3,95 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity vga_driver is
-	port(
-		clk_25 : in  std_logic;
-		rst_n  : in  std_logic;
-		h_sync : out std_logic                    := '0';
-		v_sync : out std_logic                    := '0';
-		r      : out std_logic_vector(3 downto 0) := (others => '0');
-		g      : out std_logic_vector(3 downto 0) := (others => '0');
-		b      : out std_logic_vector(3 downto 0) := (others => '0');
-		r_p    : out std_logic_vector(3 downto 0) := (others => '0');
-		g_p    : out std_logic_vector(3 downto 0) := (others => '0');
-		b_p    : out std_logic_vector(3 downto 0) := (others => '0')
-	);
+    port(
+        clk    : in  std_logic;
+        h_sync : out std_logic                    := '0';
+        v_sync : out std_logic                    := '0';
+        r      : out std_logic_vector(3 downto 0) := (others => '0');
+        g      : out std_logic_vector(3 downto 0) := (others => '0');
+        b      : out std_logic_vector(3 downto 0) := (others => '0')
+    );
 end entity vga_driver;
 
 architecture RTL of vga_driver is
-	-- http://tinyvga.com/vga-timing/640x480@60Hz
-	constant HD  : integer := 640;      -- Horizontal display (640)
-	constant HFP : integer := 16;       -- Horizontal front porch (16)
-	constant HSP : integer := 96;       -- Horizontal sync pulse (retrace) (96)
-	constant HBP : integer := 48;       -- Horizontal back porch (48)
+    -- http://tinyvga.com/vga-timing
+    constant HD  : integer := 800;      -- Horizontal display (800)
+    constant HFP : integer := 56;       -- Horizontal front porch (56)
+    constant HSP : integer := 120;      -- Horizontal sync pulse (retrace) (120)
+    constant HBP : integer := 64;       -- Horizontal back porch (64)
 
-	constant VD  : integer := 480;      -- Vertical display (480)
-	constant VFP : integer := 10;       -- Vertical front porch (10)
-	constant VSP : integer := 2;        -- Vertical sync pulse (retrace) (2)
-	constant VBP : integer := 33;       -- Vertical back porch (33)
+    constant VD  : integer := 600;      -- Vertical display (600)
+    constant VFP : integer := 37;       -- Vertical front porch (37)
+    constant VSP : integer := 6;        -- Vertical sync pulse (retrace) (6)
+    constant VBP : integer := 23;       -- Vertical back porch (23)
 
-	signal vPos      : integer := 0;
-	signal hPos      : integer := 0;
-	signal screen_nr : integer := 0;
+    signal vPos : integer := 0;
+    signal hPos : integer := 0;
+
+    type sprite is array (0 to 7) of std_logic_vector(0 to 7); -- 8x8 sprite
+    type screen is array (0 to 74, 0 to 99) of sprite; -- screen: 75 rows, 100 cols.
+    signal output_scr : screen := (others => (others => (others => "10000001")));
+    signal write      : std_logic;
+
 begin
-	process(clk_25) is
-		subtype page_nr_type is integer range 0 to 2;
-		variable page_nr : page_nr_type;
-	begin
-		if rising_edge(clk_25) then
-			if rst_n = '0' then
-				hPos      <= 0;
-				vPos      <= 0;
-				screen_nr <= 0;
-				page_nr   := 0;
-			else
-				if hPos < HD + HFP + HSP + HBP then
-					hPos <= hPos + 1;
-					if hPos > HD + HFP and hPos < HD + HFP + HSP then
-						h_sync <= '0';
-					else
-						h_sync <= '1';
-					end if;
-				else
-					hPos <= 0;
-					if vPos < VD + VFP + VSP + VBP then
-						vPos <= vPos + 1;
-						if vPos > VD + VFP and vPos < VD + VFP + VSP then
-							v_sync <= '0';
-						else
-							v_sync <= '1';
-						end if;
-					else
-						vPos      <= 0;
-						screen_nr <= screen_nr + 1;
-					end if;
-				end if;
+    process(clk) is
+        variable h_array_pos : integer := 0;
+        variable v_array_pos : integer := 0;
+    begin
+        if rising_edge(clk) then
+            if hPos < HD + HFP + HSP + HBP then
+                hPos <= hPos + 1;
+                if hPos > HD + HFP and hPos < HD + HFP + HSP then
+                    h_sync <= '0';
+                else
+                    h_sync <= '1';
+                end if;
+            else
+                hPos        <= 0;
+                h_array_pos := 0;
+                if vPos < VD + VFP + VSP + VBP then
+                    vPos <= vPos + 1;
+                    if vPos > VD + VFP and vPos < VD + VFP + VSP then
+                        v_sync <= '0';
+                    else
+                        v_sync <= '1';
+                    end if;
+                else
+                    vPos        <= 0;
+                    v_array_pos := 0;
+                end if;
+            end if;
 
-				if hPos < HD and vPos < VD then -- if the counter is in the visible screen (write what should be on the display in here)
-					if screen_nr > VD then
-						screen_nr <= 0;
-						page_nr   := page_nr + 1;
-						if page_nr > 2 then
-							page_nr := 0;
-						end if;
-					end if;
-					if vPos > screen_nr then
-						case page_nr is
-							when 0 =>
-								r <= "1111";
-								g <= "0000";
-								b <= "0000";
-							when 1 =>
-								r <= "0000";
-								g <= "1111";
-								b <= "0000";
-							when 2 =>
-								r <= "0000";
-								g <= "0000";
-								b <= "1111";
-						end case;
-					else
-						case page_nr is
-							when 0 =>
-								r   <= "0000";
-								g   <= "1111";
-								b   <= "0000";
-								r_p <= "0000";
-								g_p <= "1111";
-								b_p <= "0000";
-							when 1 =>
-								r   <= "0000";
-								g   <= "0000";
-								b   <= "1111";
-								r_p <= "0000";
-								g_p <= "0000";
-								b_p <= "1111";
-							when 2 =>
-								r   <= "1111";
-								g   <= "0000";
-								b   <= "0000";
-								r_p <= "1111";
-								g_p <= "0000";
-								b_p <= "0000";
-						end case;
-					end if;
-				else                    -- if the counter is out of the visible screen. (Do not change)
-					r <= "0000";
-					g <= "0000";
-					b <= "0000";
-				end if;
-			end if;
-		end if;
-	end process;
+            if hPos < HD and vPos < VD then -- if the counter is in the visible screen
+                -- Display here:
+                r <= "0000";
+                g <= "0000";
+                b <= "0000";
+
+                if hPos mod 8 = 0 and hPos /= 0 then
+                    h_array_pos := h_array_pos + 1;
+                end if;
+                if vPos mod 8 = 0 and vPos /= 0 then
+                    v_array_pos := v_array_pos + 1;
+                end if;
+
+                write <= output_scr(v_array_pos, h_array_pos)(vPos mod 8)(hPos mod 8);
+                if vPos mod 8 = 0 then
+                    write <= '1';
+                end if;
+                
+                if write = '1' then
+                    r <= "1111";
+                    g <= "1111";
+                    b <= "1111";
+                end if;
+
+            else                        -- if the counter is out of the visible screen
+                r <= "0000";
+                g <= "0000";
+                b <= "0000";
+            end if;
+        end if;
+    end process;
 
 end architecture RTL;

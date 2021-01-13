@@ -79,6 +79,9 @@ begin
                 if vPos mod 8 = 0 then
                     write <= '1';
                 end if;
+
+                -- UART sends data to RAM (position in RAM and write enable)
+                -- output_scr reads from RAM (position to read in RAM)
                 
                 if write = '1' then
                     r <= "1111";

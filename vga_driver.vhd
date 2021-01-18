@@ -2,6 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+
 entity vga_driver is
     port(
         clk          : in  std_logic;
@@ -37,8 +38,6 @@ begin
     begin
         if rising_edge(clk) then
             
-            we <= '0';
-            
             if hPos < HD + HFP + HSP + HBP then
                 hPos <= hPos + 1;
                 if hPos > HD + HFP and hPos < HD + HFP + HSP then
@@ -59,7 +58,9 @@ begin
                     vPos <= 0;
                 end if;
             end if;
-
+            
+            we <= '0';
+            
             if hPos < HD and vPos < VD then -- if the counter is in the visible screen
 
                 -- Display here:
@@ -73,10 +74,7 @@ begin
 
                 write <= screen(hPos mod 8);
 
-                -- UART sends data to RAM (position in RAM and write enable)
-                -- output_scr reads from RAM (position to read in RAM)
-
-                if write = '1' then
+                if write = '1' then -- make colors changeable by software?
                     r <= "1111";
                     g <= "1111";
                     b <= "1111";

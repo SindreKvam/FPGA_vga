@@ -58,7 +58,6 @@ begin
             else
 
                 -- Pulsed signal
-                valid <= '0';
                 rx_p1 <= rx;
 
                 case state is
@@ -68,6 +67,7 @@ begin
                             state          <= WAIT_START;
                             clk_counter    <= 1;
                             stop_bit_error <= '0';
+                            valid <= '0';
                         end if;
 
                     -- Wait for the duration of the start bit

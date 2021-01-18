@@ -4,12 +4,16 @@ use ieee.numeric_std.all;
 
 entity vga_driver is
     port(
-        clk    : in  std_logic;
-        h_sync : out std_logic                    := '0';
-        v_sync : out std_logic                    := '0';
-        r      : out std_logic_vector(3 downto 0) := (others => '0');
-        g      : out std_logic_vector(3 downto 0) := (others => '0');
-        b      : out std_logic_vector(3 downto 0) := (others => '0')
+        clk          : in  std_logic;
+        screen       : in  std_logic_vector(7 downto 0);
+        we           : in  std_logic;
+        read_address : out integer range 0 to 59999     := 0;
+        on_screen    : out std_logic                    := '1';
+        h_sync       : out std_logic                    := '0';
+        v_sync       : out std_logic                    := '0';
+        r            : out std_logic_vector(3 downto 0) := (others => '0');
+        g            : out std_logic_vector(3 downto 0) := (others => '0');
+        b            : out std_logic_vector(3 downto 0) := (others => '0')
     );
 end entity vga_driver;
 
@@ -28,15 +32,9 @@ architecture RTL of vga_driver is
     signal vPos : integer := 0;
     signal hPos : integer := 0;
 
-    type sprite is array (0 to 7) of std_logic_vector(0 to 7); -- 8x8 sprite
-    type screen is array (0 to 74, 0 to 99) of sprite; -- screen: 75 rows, 100 cols.
-    signal output_scr : screen := (others => (others => (others => "10000001")));
-    signal write      : std_logic;
-
+    signal write : std_logic;
 begin
     process(clk) is
-        variable h_array_pos : integer := 0;
-        variable v_array_pos : integer := 0;
     begin
         if rising_edge(clk) then
             if hPos < HD + HFP + HSP + HBP then
@@ -47,8 +45,7 @@ begin
                     h_sync <= '1';
                 end if;
             else
-                hPos        <= 0;
-                h_array_pos := 0;
+                hPos <= 0;
                 if vPos < VD + VFP + VSP + VBP then
                     vPos <= vPos + 1;
                     if vPos > VD + VFP and vPos < VD + VFP + VSP then
@@ -57,39 +54,36 @@ begin
                         v_sync <= '1';
                     end if;
                 else
-                    vPos        <= 0;
-                    v_array_pos := 0;
+                    vPos      <= 0;
                 end if;
             end if;
 
-            if hPos < HD and vPos < VD then -- if the counter is in the visible screen
+            if hPos < HD and vPos < VD and we = '0' then -- if the counter is in the visible screen
+                on_screen <= '1';
                 -- Display here:
                 r <= "0000";
                 g <= "0000";
                 b <= "0000";
 
-                if hPos mod 8 = 0 and hPos /= 0 then
-                    h_array_pos := h_array_pos + 1;
-                end if;
-                if vPos mod 8 = 0 and vPos /= 0 then
-                    v_array_pos := v_array_pos + 1;
+                if hPos mod 8 = 7 and read_address < 59999 then
+                    read_address <= read_address + 1;
                 end if;
 
-                write <= output_scr(v_array_pos, h_array_pos)(vPos mod 8)(hPos mod 8);
-                if vPos mod 8 = 0 then
-                    write <= '1';
-                end if;
-                
+                write <= screen(hPos mod 8);
+
                 if write = '1' then
                     r <= "1111";
                     g <= "1111";
                     b <= "1111";
                 end if;
-
             else                        -- if the counter is out of the visible screen
-                r <= "0000";
-                g <= "0000";
-                b <= "0000";
+                r         <= "0000";
+                g         <= "0000";
+                b         <= "0000";
+                on_screen <= '0';
+                if vPos > VD then
+                    read_address <= 0;
+                end if;
             end if;
         end if;
     end process;

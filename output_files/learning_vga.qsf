@@ -472,6 +472,10 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO[32]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO[33]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO[34]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO[35]
+set_global_assignment -name VHDL_FILE ../uart_tx.vhd
+set_global_assignment -name VHDL_FILE ../uart_rx.vhd
+set_global_assignment -name VHDL_FILE ../bram.vhd
+set_global_assignment -name VHDL_FILE ../logic_vector_to_ascii.vhd
 set_global_assignment -name SOURCE_FILE clock.cmp
 set_global_assignment -name QIP_FILE clock.qip
 set_global_assignment -name VHDL_FILE clock.vhd

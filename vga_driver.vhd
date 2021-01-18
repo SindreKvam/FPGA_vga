@@ -69,8 +69,19 @@ begin
                     read_address <= read_address + 1;
                 end if;
 
+<<<<<<< HEAD
                 write <= screen(hPos mod 8);
 
+=======
+                write <= output_scr(v_array_pos, h_array_pos)(vPos mod 8)(hPos mod 8);
+                if vPos mod 8 = 0 then
+                    write <= '1';
+                end if;
+
+                -- UART sends data to RAM (position in RAM and write enable)
+                -- output_scr reads from RAM (position to read in RAM)
+                
+>>>>>>> b73d2dc761b92302160d8350b6298c4caa9cb7a5
                 if write = '1' then
                     r <= "1111";
                     g <= "1111";

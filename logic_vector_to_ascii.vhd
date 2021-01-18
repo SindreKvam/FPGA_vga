@@ -7,7 +7,6 @@ entity logic_vector_to_ascii is
         clk           : in  std_logic;
         rst_n         : in  std_logic;
         we            : in  std_logic;
-        on_screen     : in  std_logic;
         data          : in  std_logic_vector(7 downto 0);
         ascii         : out std_logic_vector(7 downto 0);
         write_address : out integer range 0 to 59999
@@ -21,7 +20,7 @@ begin
     vector_to_ascii_converter : process(clk) is
         variable data_as_integer : integer;
     begin
-        if rising_edge(clk) and we = '1' and on_screen = '1' then
+    if rising_edge(clk) and we = '1' then
             if rst_n = '0' then
                 ascii         <= "00000000";
                 write_address <= 0;

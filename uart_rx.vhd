@@ -9,8 +9,7 @@ entity uart_rx is
         rx             : in  std_logic;
         data           : out std_logic_vector(7 downto 0);
         valid          : out std_logic;
-        stop_bit_error : out std_logic;
-        we             : out std_logic
+        stop_bit_error : out std_logic
     );
 end entity uart_rx;
 
@@ -55,13 +54,11 @@ begin
                 rx_p1          <= '0';
                 bit_counter    <= 0;
                 shift_reg      <= (others => '0');
-                we             <= '0';
 
             else
 
                 -- Pulsed signal
                 valid <= '0';
-                we    <= '0';
                 rx_p1 <= rx;
 
                 case state is
@@ -97,11 +94,6 @@ begin
                             clk_counter <= 0;
 
                             -- Shift the data in from high to low index
-                            --shift_reg(shift_reg'high) <= rx;
-                            --for i in shift_reg'high downto shift_reg'low + 1 loop
-                            --	shift_reg(i - 1) <= shift_reg(i);
-                            --end loop;
-
                             shift_reg <= rx & shift_reg(shift_reg'high downto 1);
 
                             if bit_counter = data'high then
@@ -127,7 +119,6 @@ begin
                     when CHECK_STOP =>
                         state     <= DETECT_START;
                         data      <= shift_reg;
-                        we        <= '1';
                         valid     <= '1';
                         shift_reg <= (others => '0');
 

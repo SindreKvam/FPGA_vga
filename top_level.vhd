@@ -30,7 +30,6 @@ architecture RTL of top_level is
     signal read_address  : integer range 0 to 59999;
     signal write_address : integer range 0 to 59999;
     signal write_enable  : std_logic;
-    signal on_screen     : std_logic;
 
 begin
     system_clock : entity work.clock
@@ -56,15 +55,13 @@ begin
             rx             => tx_rx,
             data           => data,
             valid          => valid,
-            stop_bit_error => stop_bit_error,
-            we             => write_enable
+            stop_bit_error => stop_bit_error
         );
     ascii_to_ram : entity work.logic_vector_to_ascii
         port map(
             clk           => clk_50,
             rst_n         => KEY(0),
             we            => write_enable,
-            on_screen     => on_screen,
             data          => data,
             ascii         => ascii,
             write_address => write_address
@@ -84,7 +81,6 @@ begin
             screen       => ram_out,
             we           => write_enable,
             read_address => read_address,
-            on_screen    => on_screen,
             h_sync       => VGA_HS,
             v_sync       => VGA_VS,
             r            => VGA_R,

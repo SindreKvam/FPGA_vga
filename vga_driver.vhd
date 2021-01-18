@@ -6,9 +6,8 @@ entity vga_driver is
     port(
         clk          : in  std_logic;
         screen       : in  std_logic_vector(7 downto 0);
-        we           : in  std_logic;
+        we           : out std_logic;
         read_address : out integer range 0 to 59999     := 0;
-        on_screen    : out std_logic                    := '1';
         h_sync       : out std_logic                    := '0';
         v_sync       : out std_logic                    := '0';
         r            : out std_logic_vector(3 downto 0) := (others => '0');
@@ -37,6 +36,9 @@ begin
     process(clk) is
     begin
         if rising_edge(clk) then
+            
+            we <= '0';
+            
             if hPos < HD + HFP + HSP + HBP then
                 hPos <= hPos + 1;
                 if hPos > HD + HFP and hPos < HD + HFP + HSP then
@@ -54,12 +56,12 @@ begin
                         v_sync <= '1';
                     end if;
                 else
-                    vPos      <= 0;
+                    vPos <= 0;
                 end if;
             end if;
 
-            if hPos < HD and vPos < VD and we = '0' then -- if the counter is in the visible screen
-                on_screen <= '1';
+            if hPos < HD and vPos < VD then -- if the counter is in the visible screen
+
                 -- Display here:
                 r <= "0000";
                 g <= "0000";
@@ -69,29 +71,21 @@ begin
                     read_address <= read_address + 1;
                 end if;
 
-<<<<<<< HEAD
                 write <= screen(hPos mod 8);
-
-=======
-                write <= output_scr(v_array_pos, h_array_pos)(vPos mod 8)(hPos mod 8);
-                if vPos mod 8 = 0 then
-                    write <= '1';
-                end if;
 
                 -- UART sends data to RAM (position in RAM and write enable)
                 -- output_scr reads from RAM (position to read in RAM)
-                
->>>>>>> b73d2dc761b92302160d8350b6298c4caa9cb7a5
+
                 if write = '1' then
                     r <= "1111";
                     g <= "1111";
                     b <= "1111";
                 end if;
             else                        -- if the counter is out of the visible screen
-                r         <= "0000";
-                g         <= "0000";
-                b         <= "0000";
-                on_screen <= '0';
+                r  <= "0000";
+                g  <= "0000";
+                b  <= "0000";
+                we <= '1';
                 if vPos > VD then
                     read_address <= 0;
                 end if;

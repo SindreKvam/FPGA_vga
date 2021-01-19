@@ -47,60 +47,60 @@ begin
                     write_address <= counter + (line * 100);
                 end if;
 
-                
+                data_as_integer := to_integer(unsigned(data));
                 case line is
                     when 0 =>
-                        case data is
-                            when "01000001" =>
+                        case data_as_integer is
+                            when 65 =>
                                 ascii <= "00011000";
                             when others =>
-                                ascii <= "11111111";
+                                ascii <= "00000000";
                         end case;
                     when 1 =>
-                        case data is
-                            when "01000001" =>
+                        case data_as_integer is
+                            when 65 =>
                                 ascii <= "00100100";
                             when others =>
                                 ascii <= "00000000";
                         end case;
                     when 2 =>
-                        case data is
-                            when "01000001" =>
+                        case data_as_integer is
+                            when 65 =>
                                 ascii <= "01000010";
                             when others =>
                                 ascii <= "00000000";
                         end case;
                     when 3 =>
-                        case data is
-                            when "01000001" =>
+                        case data_as_integer is
+                            when 65 =>
                                 ascii <= "01000010";
                             when others =>
                                 ascii <= "00000000";
                         end case;
                     when 4 =>
-                        case data is
-                            when "01000001" =>
+                        case data_as_integer is
+                            when 65 =>
                                 ascii <= "01000010";
                             when others =>
                                 ascii <= "00000000";
                         end case;
                     when 5 =>
-                        case data is
-                            when "01000001" =>
+                        case data_as_integer is
+                            when 65 =>
                                 ascii <= "01111110";
                             when others =>
                                 ascii <= "00000000";
                         end case;
                     when 6 =>
-                        case data is
-                            when "01000001" =>
+                        case data_as_integer is
+                            when 65 =>
                                 ascii <= "01000010";
                             when others =>
                                 ascii <= "00000000";
                         end case;
                     when 7 =>
-                        case data is
-                            when "01000001" =>
+                        case data_as_integer is
+                            when 65 =>
                                 ascii <= "01000010";
                             when others =>
                                 ascii <= "00000000";

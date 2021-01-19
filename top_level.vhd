@@ -6,15 +6,12 @@ entity top_level is
     port(
         MAX10_CLK1_50 : in  std_logic;
         ARDUINO_IO0   : in  std_logic;
-        ARDUINO_IO1   : out  std_logic;
         VGA_VS        : out std_logic;
         VGA_HS        : out std_logic;
         VGA_R         : out std_logic_vector(3 downto 0);
         VGA_G         : out std_logic_vector(3 downto 0);
         VGA_B         : out std_logic_vector(3 downto 0);
-        KEY           : in  std_logic_vector(1 downto 0);
-        LEDR          : out std_logic_vector(7 downto 0);
-        SW            : in  std_logic_vector(7 downto 0)
+        KEY           : in  std_logic_vector(1 downto 0)
     );
 end entity top_level;
 
@@ -22,11 +19,8 @@ architecture RTL of top_level is
     signal clk_50 : std_logic;
 
     signal valid          : std_logic;
-    signal stop_bit_error : std_logic;
-    --signal tx_rx          : std_logic;
-    signal tx_busy        : std_logic;
+    signal stop_bit_error : std_logic; -- @suppress "signal stop_bit_error is never read"
 
-    signal line    : integer range 0 to 7;
     signal data    : std_logic_vector(7 downto 0);
     signal ascii   : std_logic_vector(7 downto 0);
     signal ram_out : std_logic_vector(7 downto 0);
@@ -43,21 +37,12 @@ begin
             c0     => clk_50,
             locked => open
         );
-  uart_tx_module : entity work.uart_tx
-      port map(
-          clk   => clk_50,
-          rst_n => KEY(0),
-          start => KEY(1),
-          data  => SW,
-          busy  => tx_busy,
-          tx    => ARDUINO_IO1
-      );
     uart_rx_module : entity work.uart_rx
         port map(
             clk            => clk_50,
             rst_n          => KEY(0),
             rx             => ARDUINO_IO0,
-            data           => LEDR,
+            data           => data,
             valid          => valid,
             stop_bit_error => stop_bit_error
         );

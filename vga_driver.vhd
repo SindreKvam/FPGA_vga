@@ -62,8 +62,8 @@ begin
             we <= '0';
             
             if hPos < HD and vPos < VD then -- if the counter is in the visible screen
-
                 -- Display here:
+                
                 r <= "0000";
                 g <= "0000";
                 b <= "0000";

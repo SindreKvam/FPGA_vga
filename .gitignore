@@ -1,4 +1,26 @@
+.library_mapping.xml
+.project
+.settings/*
+
+/incremental_db/*
+/greybox_tmp/*
+/db/*
+/simulation/*
+/work/*
+
+transcript
+
+*.wlf
+*.mti
+*.bak
+*.mpf
 
 /modelsim/*
 !/modelsim/run.do
 !/modelsim/*.mpf
+
+/output_files/*
+!/output_files/*.vhd
+!/output_files/*.qip
+!/output_files/*.qsf
+!/output_files/*.qpf

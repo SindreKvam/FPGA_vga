@@ -4,17 +4,17 @@ use ieee.std_logic_1164.all;
 entity single_clock_rw_ram is
     port(
         clk           : in  std_logic;
-        data          : in  std_logic_vector(7 downto 0);
-        write_address : in  integer range 0 to 59999;
-        read_address  : in  integer range 0 to 59999;
+        data          : in  std_logic_vector(4 downto 0);
+        write_address : in  normal range 0 to 95999;
+        read_address  : in  normal range 0 to 95999;
         we            : in  std_logic;
-        q             : out std_logic_vector(7 downto 0)
+        q             : out std_logic_vector(4 downto 0)
     );
 end single_clock_rw_ram;
 architecture rtl of single_clock_rw_ram is
-    type mem is array (0 to 59999) of std_logic_vector(7 downto 0);
+    type mem is array (0 to 95999) of std_logic_vector(4 downto 0);
     signal ram_block        : mem;
-    signal read_address_reg : integer range 0 to 59999;
+    signal read_address_reg : normal range 0 to 95999;
 
 begin
     process(clk)

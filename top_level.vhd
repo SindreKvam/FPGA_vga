@@ -19,14 +19,14 @@ architecture RTL of top_level is
     signal clk_50 : std_logic;
 
     signal valid          : std_logic;
-    signal stop_bit_error : std_logic; -- @suppress "signal stop_bit_error is never read"
+    signal stop_bit_error : std_logic;
 
-    signal data    : std_logic_vector(7 downto 0);
-    signal ascii   : std_logic_vector(7 downto 0);
-    signal ram_out : std_logic_vector(7 downto 0);
+    signal recieved_data_uart   : std_logic_vector(7 downto 0);
+    signal ascii_character      : std_logic_vector(39 downto 0);
+    signal ram_out              : std_logic_vector(7 downto 0);
 
-    signal read_address  : integer range 0 to 59999;
-    signal write_address : integer range 0 to 59999;
+    signal read_address  : normal range 0 to 95999;
+    signal write_address : normal range 0 to 95999;
     signal write_enable  : std_logic;
 
 begin
@@ -42,23 +42,24 @@ begin
             clk            => clk_50,
             rst_n          => KEY(0),
             rx             => ARDUINO_IO0,
-            data           => data,
+            data           => recieved_data_uart,
             valid          => valid,
             stop_bit_error => stop_bit_error
         );
-    ascii_to_ram_line_1 : entity work.logic_vector_to_ascii
+
+    ascii_table : entity work.ROM_ascii_table
         port map(
-            rst_n         => KEY(0),
-            we            => write_enable,
-            valid_uart    => valid,
-            data          => data,
-            ascii         => ascii,
-            write_address => write_address
+            address	=> recieved_data_uart,  -- Data recieved via UART (ascii character value)
+		    clock   => clk_50,              -- clock pulse (50MHz)
+		    q		=> ascii_character      -- 40 bit ascii character
         );
+
+    -- Insert ascii to BRAM here
+
     block_ram : entity work.single_clock_rw_ram
         port map(
             clk           => clk_50,
-            data          => ascii,
+            data          => --ascii,
             write_address => write_address,
             read_address  => read_address,
             we            => write_enable,

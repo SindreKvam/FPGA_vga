@@ -8,7 +8,7 @@ entity vga_driver is
         clk          : in  std_logic;
         screen       : in  std_logic_vector(7 downto 0);
         we           : out std_logic;
-        read_address : out integer range 0 to 59999     := 0;
+        read_address : out integer range 0 to 95999     := 0;
         h_sync       : out std_logic                    := '0';
         v_sync       : out std_logic                    := '0';
         r            : out std_logic_vector(3 downto 0) := (others => '0');
